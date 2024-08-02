@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 
 st.title("Battery Charge calculator for SOE")
 st.write(
@@ -19,17 +20,22 @@ battery_capacity = st.number_input("Total Battery Capacity (kWh)", min_value=0, 
 # Plus/Minus buttons for EV vehicles
 num_vehicles = st.number_input("Number of EV Vehicles to Charge per day", min_value=0, max_value=20, value=1, step=1)
 
-# total battery output per day from charging EV vehicles
-vehicle_charge_total = num_vehicles*80
+if st.button("Calculate"):
+    with st.spinner('Calculating...'):
+        time.sleep(1)  # Simulate a delay for calculation
 
-# net sum of daily energy generation
-daily_battery_input = energy_generation - vehicle_charge_total
+        # Total battery output per day from charging EV vehicles
+        vehicle_charge_total = num_vehicles * 80
 
-days_to_full = battery_capacity / daily_battery_input
+        # Net sum of daily energy generation
+        daily_battery_input = energy_generation - vehicle_charge_total
 
-if days_to_full < 0:
-    days_to_empty = 1/abs(days_to_full)
-    st.write(f"Battery will EMPTY in approximately {days_to_empty:.1f} days")
-else:
-    st.write(f"Battery will fill up in approximately {days_to_full:.1f} days")
-
+        # Calculate days to full or empty
+        if daily_battery_input > 0:
+            days_to_full = battery_capacity / daily_battery_input
+            st.subheader(f"Battery will fill up in approximately {days_to_full:.1f} days")
+        elif daily_battery_input < 0:
+            days_to_empty = battery_capacity / abs(daily_battery_input)
+            st.subheader(f"Battery will EMPTY in approximately {days_to_empty:.1f} days")
+        else:
+            st.subheader("Battery charge remains constant with the current configuration.")
